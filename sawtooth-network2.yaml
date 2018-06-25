@@ -34,7 +34,7 @@ services:
       bash -c "
         sawadm keygen --force && \
         apt-get update && \
-        apt-get -y install curl && \
+        apt-get -qq -y install curl && \
         cd /etc/sawtooth && \
         curl -0 https://raw.githubusercontent.com/hyperledger/sawtooth-core/master/validator/packaging/validator.toml.example -o validator.toml && \
         cd && \
