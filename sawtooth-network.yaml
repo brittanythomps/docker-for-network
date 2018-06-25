@@ -52,8 +52,10 @@ services:
           -o poet-settings.batch && \
         sawadm genesis \
           config-genesis.batch config.batch poet.batch poet-settings.batch && \
+        apt-get update && \
+        apt-get -y install curl && \
         cd /etc/sawtooth && \
-        wget -O validator.toml https://raw.githubusercontent.com/hyperledger/sawtooth-core/master/validator/packaging/validator.toml.example && \
+        curl -0 https://raw.githubusercontent.com/hyperledger/sawtooth-core/master/validator/packaging/validator.toml.example -o validator.toml && \
         cd && \
         sawtooth-validator -v \
           --bind network:tcp://eth0:8800 \
