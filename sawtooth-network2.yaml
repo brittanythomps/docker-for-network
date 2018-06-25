@@ -33,6 +33,11 @@ services:
     command: |
       bash -c "
         sawadm keygen --force && \
+        apt-get update && \
+        apt-get -y install curl && \
+        cd /etc/sawtooth && \
+        curl -0 https://raw.githubusercontent.com/hyperledger/sawtooth-core/master/validator/packaging/validator.toml.example -o validator.toml && \
+        cd && \
         sawtooth-validator -v \
             --bind network:tcp://eth0:8800 \
             --bind component:tcp://eth0:4004 \
