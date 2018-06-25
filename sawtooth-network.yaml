@@ -53,7 +53,7 @@ services:
         sawadm genesis \
           config-genesis.batch config.batch poet.batch poet-settings.batch && \
         cd /etc/sawtooth && \
-        curl -0 https://raw.githubusercontent.com/hyperledger/sawtooth-core/master/validator/packaging/validator.toml.example -o validator.toml && \
+        wget -O validator.toml https://raw.githubusercontent.com/hyperledger/sawtooth-core/master/validator/packaging/validator.toml.example && \
         cd && \
         sawtooth-validator -v \
           --bind network:tcp://eth0:8800 \
