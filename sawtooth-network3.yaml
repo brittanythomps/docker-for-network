@@ -24,7 +24,7 @@ services:
         tail -f /dev/null \
         \""
 
-  validator-1:
+  validator:
     image: hyperledger/sawtooth-validator:1.0
     container_name: sawtooth-validator-default-1
     expose:
@@ -67,17 +67,16 @@ services:
     command: |
       bash -c "
         sawtooth-rest-api \
-          --connect tcp://validator-1:4004 \
+          --connect tcp://validator:4004 \
           --bind rest-api-1:8008
       "
     stop_signal: SIGKILL
-
-  intkey-tp-1:
-    image: hyperledger/sawtooth-intkey-tp-python:1.0
-    container_name: sawtooth-intkey-tp-python-default-1
+    
+  licenses:
+    image: destroyah/samplesettingsprocessorclient:2.0
+    container_name: licensing-0
     expose:
       - 4004
-    command: intkey-tp-python -C tcp://validator-1:4004
     stop_signal: SIGKILL
 
   settings-tp-1:
@@ -85,7 +84,7 @@ services:
     container_name: sawtooth-settings-tp-default-1
     expose:
       - 4004
-    command: settings-tp -C tcp://validator-1:4004
+    command: settings-tp -C tcp://validator:4004
     stop_signal: SIGKILL
 
   poet-validator-registry-tp-1:
@@ -93,7 +92,7 @@ services:
     container_name: sawtooth-poet-validator-registry-tp-1
     expose:
       - 4004
-    command: poet-validator-registry-tp -C tcp://validator-1:4004
+    command: poet-validator-registry-tp -C tcp://validator:4004
     environment:
       PYTHONPATH: /project/sawtooth-core/consensus/poet/common
     stop_signal: SIGKILL
