@@ -1,0 +1,91 @@
+version: "2.1"
+
+services:
+  shell:
+    image: hyperledger/sawtooth-all:1.0
+    container_name: sawtooth-shell-default
+    entrypoint: "bash -c \"\
+        sawtooth keygen && \
+        tail -f /dev/null \
+        \""
+
+  validator:
+    image: hyperledger/sawtooth-validator:1.0
+    container_name: sawtooth-validator-default-1
+    expose:
+      - 4004
+      - 8800
+    ports:
+      - "4004:4004"
+      - "8800:8800"
+    command: |
+      bash -c "
+        sawadm keygen --force && \
+        apt-get update && \
+        apt-get -qq -y install curl && \
+        cd /etc/sawtooth && \
+        curl -0 https://raw.githubusercontent.com/hyperledger/sawtooth-core/master/validator/packaging/validator.toml.example -o validator.toml && \
+        cd && \
+        sawtooth-validator -v \
+            --bind network:tcp://eth0:8800 \
+            --bind component:tcp://eth0:4004 \
+            --peering dynamic \
+            --endpoint tcp://172.31.90.35:8800 \
+            --seeds tcp://172.31.31.38:8800 \
+            --scheduler serial \
+            --network trust
+      "
+    environment:
+      PYTHONPATH: "/project/sawtooth-core/consensus/poet/common:\
+        /project/sawtooth-core/consensus/poet/simulator:\
+        /project/sawtooth-core/consensus/poet/core"
+    stop_signal: SIGKILL
+    
+  rest-api:
+    image: hyperledger/sawtooth-rest-api:1.0
+    container_name: sawtooth-rest-api-default-1
+    expose:
+      - 4004
+      - 8008
+    ports: 
+      - "8008:8008"
+    command: |
+      bash -c "
+        sawtooth-rest-api \
+          --connect tcp://validator:4004 \
+          --bind rest-api-1:8008
+      "
+    stop_signal: SIGKILL
+
+  licenses:
+    image: brittanythomps/licenses:2.0
+    container_name: licensing-0
+    expose:
+      - 4004
+    stop_signal: SIGKILL
+
+  settings-tp:
+    image: hyperledger/sawtooth-settings-tp:1.0
+    container_name: sawtooth-settings-tp-default-1
+    expose:
+      - 4004
+    command: settings-tp -C tcp://validator:4004
+    stop_signal: SIGKILL
+    
+  identity-tp:
+    image: hyperledger/sawtooth-identity-tp:1.0
+    container_name: sawtooth-identity-tp-0
+    expose:
+      - 4004
+    command: identity-tp -C tcp://validator:4004
+    stop_signal: SIGKILL
+
+  poet-validator-registry-tp:
+    image: hyperledger/sawtooth-poet-validator-registry-tp:1.0
+    container_name: sawtooth-poet-validator-registry-tp-1
+    expose:
+      - 4004
+    command: poet-validator-registry-tp -C tcp://validator:4004
+    environment:
+      PYTHONPATH: /project/sawtooth-core/consensus/poet/common
+    stop_signal: SIGKILL
